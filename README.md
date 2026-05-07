@@ -3,7 +3,7 @@
 > **Control a holographic 3D orb with your bare hands.**  
 > Built with MediaPipe, Three.js, and pure WebGL — no frameworks, no installs, just open and go.
 
-**Made by [Monish Paramasivam](https://github.com/MonishParamasivam)**
+**Made by [Monish Paramasivam](https://github.com/monish4030)**
 
 ---
 
@@ -51,7 +51,7 @@
 ### Option 1 — Open directly in browser
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR_USERNAME/neural-hand.git
+git clone https://github.com/monish4030/neural-hand.git
 cd neural-hand
 
 # Just open index.html in Chrome or Edge
