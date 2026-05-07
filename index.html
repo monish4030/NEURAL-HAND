@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEURAL HAND — Cyberpunk Interface</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ══════════════ PERMISSION SCREEN ══════════════ -->
+  <div id="permission-screen">
+    <div class="perm-card">
+      <div class="perm-icon">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 8C32 8 20 14 20 28V44L32 50L44 44V28C44 14 32 8 32 8Z" stroke="currentColor" stroke-width="2" fill="none"/>
+          <circle cx="32" cy="28" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+          <path d="M26 40 Q32 46 38 40" stroke="currentColor" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+      <div class="perm-scanline"></div>
+      <h1 class="perm-title">NEURAL HAND<span class="blink">_</span></h1>
+      <p class="perm-sub">CYBERPUNK GESTURE CONTROL INTERFACE</p>
+      <div class="perm-divider"></div>
+      <p class="perm-desc">
+        Control a holographic orb with your bare hands. Uses <span class="highlight">MediaPipe neural tracking</span> to recognise gestures and trigger real-time Three.js effects.
+      </p>
+      <div class="perm-specs">
+        <div class="spec"><span class="spec-key">TECH</span><span class="spec-val">MediaPipe · Three.js · WebGL</span></div>
+        <div class="spec"><span class="spec-key">GESTURES</span><span class="spec-val">7 hand controls detected</span></div>
+        <div class="spec"><span class="spec-key">PRIVACY</span><span class="spec-val">100% local · no data sent</span></div>
+      </div>
+      <button id="start-btn" class="start-btn">
+        <span class="btn-text">INITIALIZE SYSTEM</span>
+        <div class="btn-glow"></div>
+      </button>
+      <p class="perm-footer">Made by <span class="author">Monish Paramasivam</span></p>
+    </div>
+    <div class="grid-bg"></div>
+  </div>
+
+  <!-- ══════════════ MAIN APP ══════════════ -->
+  <div id="app" class="hidden">
+
+    <div id="canvas-container"></div>
+    <video id="webcam" autoplay playsinline muted></video>
+
+    <!-- Gesture Flash -->
+    <div id="gesture-flash" class="gesture-flash"></div>
+
+    <!-- Hand skeleton overlay -->
+    <canvas id="hand-canvas"></canvas>
+
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-corner hud-tl">
+        <div class="hud-title">NEURAL HAND</div>
+        <div class="hud-sub">v3.0.0 // GESTURE OS</div>
+      </div>
+      <div class="hud-corner hud-tr">
+        <div class="status-row">
+          <div class="status-dot" id="tracking-dot"></div>
+          <span id="tracking-status">INITIALIZING</span>
+        </div>
+        <div class="fps-counter" id="fps-display">-- FPS</div>
+      </div>
+      <div class="hud-corner hud-bl">
+        <div class="data-row"><span class="data-label">GESTURE</span><span class="data-val" id="gesture-display">---</span></div>
+        <div class="data-row"><span class="data-label">OPENNESS</span><span class="data-val" id="openness-display">0%</span></div>
+        <div class="data-row"><span class="data-label">COLOR</span><span class="data-val" id="color-display">CYAN</span></div>
+        <div class="data-row"><span class="data-label">MODE</span><span class="data-val" id="mode-display">NORMAL</span></div>
+      </div>
+      <div class="scanlines"></div>
+      <div class="corner-deco corner-deco--tl"></div>
+      <div class="corner-deco corner-deco--tr"></div>
+      <div class="corner-deco corner-deco--bl"></div>
+      <div class="corner-deco corner-deco--br"></div>
+    </div>
+
+    <!-- Gesture Control Legend -->
+    <div class="gesture-legend" id="gesture-legend">
+      <div class="legend-header">
+        <span class="legend-title">✦ GESTURE CONTROLS</span>
+        <button class="legend-toggle" id="legend-toggle">▲ HIDE</button>
+      </div>
+      <div class="legend-body" id="legend-body">
+        <div class="legend-row" id="lg-open">
+          <div class="lg-icon">✋</div>
+          <div class="lg-info"><div class="lg-name">OPEN PALM</div><div class="lg-desc">Expand orb + attract particles</div></div>
+          <div class="lg-state" id="st-open">●</div>
+        </div>
+        <div class="legend-row" id="lg-fist">
+          <div class="lg-icon">✊</div>
+          <div class="lg-info"><div class="lg-name">CLOSED FIST</div><div class="lg-desc">Shrink orb + repel particles</div></div>
+          <div class="lg-state" id="st-fist">●</div>
+        </div>
+        <div class="legend-row" id="lg-point">
+          <div class="lg-icon">☝️</div>
+          <div class="lg-info"><div class="lg-name">POINT (1 finger)</div><div class="lg-desc">Laser beam from orb tip</div></div>
+          <div class="lg-state" id="st-point">●</div>
+        </div>
+        <div class="legend-row" id="lg-peace">
+          <div class="lg-icon">✌️</div>
+          <div class="lg-info"><div class="lg-name">PEACE / V-SIGN</div><div class="lg-desc">Cycle orb colour theme</div></div>
+          <div class="lg-state" id="st-peace">●</div>
+        </div>
+        <div class="legend-row" id="lg-three">
+          <div class="lg-icon">🤟</div>
+          <div class="lg-info"><div class="lg-name">THREE FINGERS</div><div class="lg-desc">Particle explosion burst</div></div>
+          <div class="lg-state" id="st-three">●</div>
+        </div>
+        <div class="legend-row" id="lg-pinch">
+          <div class="lg-icon">🤏</div>
+          <div class="lg-info"><div class="lg-name">PINCH (thumb+index)</div><div class="lg-desc">Freeze / unfreeze rotation</div></div>
+          <div class="lg-state" id="st-pinch">●</div>
+        </div>
+        <div class="legend-row" id="lg-thumb">
+          <div class="lg-icon">👍</div>
+          <div class="lg-info"><div class="lg-name">THUMBS UP</div><div class="lg-desc">Toggle wireframe mode</div></div>
+          <div class="lg-state" id="st-thumb">●</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Energy bar -->
+    <div class="energy-bar-wrap">
+      <div class="energy-label">ENERGY</div>
+      <div class="energy-track">
+        <div class="energy-fill" id="energy-fill"></div>
+      </div>
+    </div>
+
+    <div class="footer-credit">Made by <span class="author-name">Monish Paramasivam</span></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
